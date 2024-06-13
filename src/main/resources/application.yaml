@@ -1,0 +1,94 @@
+spring:
+  datasource:
+    url: jdbc:mysql://${mysql.host}:3306/saaswork?characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&allowMultiQueries=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${mysql.username}
+    password: ${mysql.password}
+  redis:
+    database: 0
+    host: ${redis.host}
+    port: 6379
+  profiles:
+    active: local
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+server:
+  port: 8656
+  servlet:
+    encoding:
+      charset: utf-8
+
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+
+
+
+
+logging:
+  level:
+    com.pl.analysisprojecttool: debug
+
+
+
+pagehelper:
+  helperDialect: 'mysql'
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+analysis:
+  type-package-name-prefix: ''
+  method-stmts-val-invoker-package-name-prefix: ''
+  #  解析的字节码目录 和 一些需要配合解析的 依赖库目录
+  targetDirs:
+    #    - 'D:\fargo-crm-backend\fargo-news\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-background\target\classes'
+    - 'D:\fargo-crm-backend\fargo-common\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-community\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-compliance\target\classes'
+    - 'D:\fargo-crm-backend\fargo-dashboard\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-data-report\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-elasticsearch-news\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-file-server\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-im\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-lifecycle-calc\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-lifecycle-management\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-ltv-cof\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-mail\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-member\target\classes'
+    - 'D:\fargo-crm-backend\fargo-bam\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-news\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-news-plate\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-notification\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-organization\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-private-equity\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-project-manager\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-protobuf\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-right\target\classes'
+    - 'D:\fargo-crm-backend\fargo-risk\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-special-service\target\classes'
+    #    - 'D:\fargo-crm-backend\fargo-sso\target\classes'
+    - 'D:\fargo-crm-backend\fargo-transaction\target\classes'
+  #    - 'D:\fargo-crm-backend\fargo-transfer-account\target\classes'
+  #    - 'D:\fargo-crm-backend\fargo-user\target\classes'
+  #    - 'D:\fargo-crm-backend\fargo-web\target\classes'
+  #    - 'D:\fargo-crm-backend\fargo-wx\target\classes'
+  jarLibs:
+    #   基础 jar 包目录  这条是 java8 的基础库目录
+    - 'D:\java\lib\*'
+    - 'D:\mavenRepository\com\baomidou\mybatis-plus-extension\3.3.2\mybatis-plus-extension-3.3.2.jar'
+    - 'D:\mavenRepository\com\baomidou\mybatis-plus-core\3.3.2\mybatis-plus-core-3.3.2.jar'
+
+  #   mapper对应的xml 解析目录
+  sqlXmlBaseDirs:
+    - 'D:\fargo-crm-backend\fargo-risk\src\main\resources'
+    - 'D:\fargo-crm-backend\fargo-transaction\src\main\resources'
+    - 'D:\fargo-crm-backend\fargo-bam\src\main\resources\mapper'
+    - 'D:\fargo-crm-backend\fargo-dashboard\src\main\resources'
+  sqlXml:
+    cache:
+      dir: 'D:\analysis-project-tool\cache'
