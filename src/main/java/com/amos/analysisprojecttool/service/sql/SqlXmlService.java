@@ -20,6 +20,17 @@ public class SqlXmlService {
     @Autowired
     SqlXmlParser sqlXmlParser;
 
+    public Set<String> getAllSqlTables(){
+        Map<String, ParseXmlResult> xmlResultMap = sqlXmlParseResultCache.getXmlResultMap();
+        Set<String> tables = new HashSet<>();
+        for (ParseXmlResult xmlResult : xmlResultMap.values()) {
+            for (Collection<String> tableColl : xmlResult.getElementTablesMap().values()) {
+                tables.addAll(tableColl);
+            }
+        }
+        return tables;
+    }
+
     public void parseDirXml(String directoryPath) {
         String targetFileNamePattern = ".*\\.xml$";// 指定目标文件名 正则
         List<File> foundFiles = sqlXmlParser.searchFiles(directoryPath, targetFileNamePattern);

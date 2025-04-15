@@ -1,11 +1,14 @@
 package com.amos.analysisprojecttool.controller;
 
 import cn.hutool.core.util.ZipUtil;
+import com.amos.analysisprojecttool.bean.ComRes;
 import com.amos.analysisprojecttool.bean.req.CallGraphReq;
+import com.amos.analysisprojecttool.bean.res.ClassInfoRes;
+import com.amos.analysisprojecttool.bean.res.EndpointRes;
 import com.amos.analysisprojecttool.bean.res.MethodAndEndPointResult;
 import com.amos.analysisprojecttool.bean.res.MethodCallChainRes;
-import com.amos.analysisprojecttool.util.CallGraphUtils;
 import com.amos.analysisprojecttool.service.AnalysisTool;
+import com.amos.analysisprojecttool.util.CallGraphUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +17,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,9 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipOutputStream;
 
 @Slf4j
@@ -51,6 +53,7 @@ public class BaseController {
         }
     }
 
+
     /**
      * 查询某个表涉及到的接口-json
      *
@@ -59,8 +62,8 @@ public class BaseController {
      */
     @ApiOperation("查询某个表涉及到的接口-json")
     @PostMapping("/oneTableMappingEndPoints")
-    public Set<MethodAndEndPointResult> oneTableMappingEndPoints(@RequestBody CallGraphReq req) {
-        return analysisTool.oneTableMappingEndPoints(req.getTableName());
+    public ComRes<Set<MethodAndEndPointResult>> oneTableMappingEndPoints(@RequestBody CallGraphReq req) {
+        return ComRes.success(analysisTool.oneTableMappingEndPoints(req.getTableName()));
     }
 
 
@@ -72,14 +75,29 @@ public class BaseController {
      */
     @ApiOperation("查询某个方法的调用图 - 以 mermaid文本的形式返回")
     @PostMapping("/callGraphToMermaidText")
-    public String callGraphToMermaidText(@RequestBody CallGraphReq req) {
+    public ComRes<String> callGraphToMermaidText(@RequestBody CallGraphReq req) {
+
         if (req.getDirection().equals("down")) {
             MethodCallChainRes methodCallChainRes = analysisTool.callGraph(req.getClassFullyName(), req.getMethodName());
-            return CallGraphUtils.graphChainToMermaidText(methodCallChainRes);
+            return ComRes.success(CallGraphUtils.graphChainToMermaidText(methodCallChainRes));
         } else {
             MethodCallChainRes methodCallChainRes = analysisTool.callGraphReverse(req.getClassFullyName(), req.getMethodName());
-            return CallGraphUtils.graphChainToMermaidText(methodCallChainRes);
+            return ComRes.success(CallGraphUtils.graphChainToMermaidText(methodCallChainRes));
         }
+    }
+
+    /**
+     * 查询某个方法的调用图  md 内容
+     *
+     * @param req
+     * @return
+     */
+    @ApiOperation("查询某个方法的调用图  md 内容")
+    @PostMapping("/queryCallGraphToMdTxt")
+    public ComRes<String> queryCallGraphToMdTxt(@RequestBody CallGraphReq req) {
+        String content = analysisTool.queryCallGraphToMdTxt(req.getDirection(), req.getClassFullyName(), req.getMethodName(), req.isGenMermaidText());
+        // 构建响应实体
+        return ComRes.success(content);
     }
 
     /**
@@ -104,6 +122,19 @@ public class BaseController {
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    }
+
+    /**
+     * 查询指定表名 对于的函数调用图谱，md内容
+     *
+     * @param req
+     * @return
+     */
+    @ApiOperation("查询指定表名 对于的函数调用图谱，md内容 ")
+    @PostMapping("/queryTableMapperCallGraphToMdTxt")
+    public ComRes<String> queryTableMapperCallGraphToMdTxt(@RequestBody CallGraphReq req) {
+        String content = analysisTool.queryTableMapperCallGraphToMd(req.getTableName(), req.isGenMermaidText());
+        return ComRes.success(content);
     }
 
     /**
@@ -163,4 +194,38 @@ public class BaseController {
     }
 
 
+
+    /**
+     * 所有接口
+     *
+     * @return
+     */
+    @ApiOperation("所有接口")
+    @GetMapping("/allEndPoints")
+    public Collection<EndpointRes> allEndPoints() {
+        return analysisTool.allEndPoints();
+    }
+
+    /**
+     * 所有表
+     *
+     * @return
+     */
+    @ApiOperation("扫描所有表对应的接口")
+    @GetMapping("/allTables")
+    public ComRes<Collection<String>> allTables() {
+        return ComRes.success(analysisTool.allTables());
+    }
+
+    /**
+     * 查询所有的类和方法
+     *
+     * @param req
+     * @return
+     */
+    @ApiOperation("查询所有的类和方法")
+    @PostMapping("/allClassInfo")
+    public ComRes<List<ClassInfoRes>> allClassInfo(@RequestBody CallGraphReq req) {
+        return ComRes.success(analysisTool.allClassInfo(req.getClassFullyName(), req.getMethodName()));
+    }
 }

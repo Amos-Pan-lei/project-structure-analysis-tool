@@ -30,7 +30,7 @@ mybatis-plus:
 
 logging:
   level:
-    com.pl.analysisprojecttool: debug
+    com.amos.analysisprojecttool: debug
 
 
 
@@ -41,8 +41,8 @@ pagehelper:
   params: count=countSql
 
 analysis:
-  type-package-name-prefix: ''
-  method-stmts-val-invoker-package-name-prefix: ''
+  type-package-name-prefix: 'hk.com.easyview'
+  method-stmts-val-invoker-package-name-prefix: 'hk.com.easyview'
   #  解析的字节码目录 和 一些需要配合解析的 依赖库目录
   targetDirs:
     #    - 'D:\fargo-crm-backend\fargo-news\target\classes'
@@ -50,7 +50,7 @@ analysis:
     - 'D:\fargo-crm-backend\fargo-common\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-community\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-compliance\target\classes'
-    - 'D:\fargo-crm-backend\fargo-dashboard\target\classes'
+#    - 'D:\fargo-crm-backend\fargo-dashboard\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-data-report\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-elasticsearch-news\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-file-server\target\classes'
@@ -69,10 +69,10 @@ analysis:
     #    - 'D:\fargo-crm-backend\fargo-project-manager\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-protobuf\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-right\target\classes'
-    - 'D:\fargo-crm-backend\fargo-risk\target\classes'
+#    - 'D:\fargo-crm-backend\fargo-risk\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-special-service\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-sso\target\classes'
-    - 'D:\fargo-crm-backend\fargo-transaction\target\classes'
+#    - 'D:\fargo-crm-backend\fargo-transaction\target\classes'
   #    - 'D:\fargo-crm-backend\fargo-transfer-account\target\classes'
   #    - 'D:\fargo-crm-backend\fargo-user\target\classes'
   #    - 'D:\fargo-crm-backend\fargo-web\target\classes'
@@ -85,10 +85,10 @@ analysis:
 
   #   mapper对应的xml 解析目录
   sqlXmlBaseDirs:
-    - 'D:\fargo-crm-backend\fargo-risk\src\main\resources'
-    - 'D:\fargo-crm-backend\fargo-transaction\src\main\resources'
+#    - 'D:\fargo-crm-backend\fargo-risk\src\main\resources'
+#    - 'D:\fargo-crm-backend\fargo-transaction\src\main\resources'
     - 'D:\fargo-crm-backend\fargo-bam\src\main\resources\mapper'
-    - 'D:\fargo-crm-backend\fargo-dashboard\src\main\resources'
+#    - 'D:\fargo-crm-backend\fargo-dashboard\src\main\resources'
   sqlXml:
     cache:
-      dir: 'D:\analysis-project-tool\cache'
+      dir: 'D:\backend-analysis-project-tool\cache'

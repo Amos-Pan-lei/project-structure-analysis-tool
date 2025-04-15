@@ -2,8 +2,7 @@ package com.amos.analysisprojecttool.service;
 
 import cn.hutool.core.util.StrUtil;
 import com.amos.analysisprojecttool.bean.bytecode.MethodCallChain;
-import com.amos.analysisprojecttool.bean.res.MethodAndEndPointResult;
-import com.amos.analysisprojecttool.bean.res.MethodCallChainRes;
+import com.amos.analysisprojecttool.bean.res.*;
 import com.amos.analysisprojecttool.database.mapper.TableJavaMethodMappingNoteMapper;
 import com.amos.analysisprojecttool.database.pojo.TableJavaMethodMappingNote;
 import com.amos.analysisprojecttool.service.sql.MapperFindResult;
@@ -12,9 +11,11 @@ import com.amos.analysisprojecttool.util.AnalysisClassUtils;
 import com.amos.analysisprojecttool.util.CallGraphUtils;
 import com.amos.analysisprojecttool.util.MdGenMdUtil;
 import com.amos.analysisprojecttool.util.MybatisPlusUtils;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,41 @@ public class AnalysisTool {
     @Autowired
     private TableJavaMethodMappingNoteMapper noteMapper;
 
+
+    public List<ClassInfoRes> allClassInfo(String classNameSearch, String methodName) {
+        HashMultimap<String, MethodCallNodeInfo> classInfoMultimap = HashMultimap.create();
+        HashMultimap<JavaSootMethod, JavaSootMethod> methodCallMap = sootUpByteCodeAnalysis.getMethodCallMap();
+        methodCallMap.forEach((call, called) -> {
+            if (!StrUtil.contains(call.getName(), "$")) {
+                classInfoMultimap.put(call.getDeclaringClassType().getFullyQualifiedName(), new MethodCallNodeInfo(call));
+            }
+            if (!StrUtil.contains(called.getName(), "$")) {
+                classInfoMultimap.put(called.getDeclaringClassType().getFullyQualifiedName(), new MethodCallNodeInfo(called));
+            }
+        });
+        HashMultimap<JavaSootMethod, JavaSootMethod> methodCallReverseMap = sootUpByteCodeAnalysis.getMethodCallReverseMap();
+        methodCallReverseMap.forEach((call, called) -> {
+            if (!StrUtil.contains(call.getName(), "$")) {
+                classInfoMultimap.put(call.getDeclaringClassType().getFullyQualifiedName(), new MethodCallNodeInfo(call));
+            }
+            if (!StrUtil.contains(called.getName(), "$")) {
+                classInfoMultimap.put(called.getDeclaringClassType().getFullyQualifiedName(), new MethodCallNodeInfo(called));
+            }
+        });
+        Map<String, Collection<MethodCallNodeInfo>> map = classInfoMultimap.asMap();
+
+        List<ClassInfoRes> resList = new ArrayList<>();
+
+        map.forEach((className, methods) -> {
+            if (StrUtil.isBlank(classNameSearch) || StrUtil.containsIgnoreCase(className, classNameSearch)) {
+                ClassInfoRes classInfoRes = new ClassInfoRes();
+                classInfoRes.setClassFullName(className);
+                classInfoRes.setMethods(methods);
+                resList.add(classInfoRes);
+            }
+        });
+        return resList;
+    }
 
     public MethodCallChainRes callGraph(String classFullyName, String methodName) {
         MethodCallChain methodCallChain = sootUpByteCodeAnalysis.queryCallGraph(classFullyName, methodName);
@@ -152,11 +188,17 @@ public class AnalysisTool {
         }
         tableName = StrUtil.trim(tableName);
         List<MethodCallChain> callChainList = queryAlCallReverseGraphByTableName(tableName);
-        log.info("{} 总共 {} 个 调用链 ", tableName, callChainList.size());
+        String mdtext = chainToMarkdown(tableName, ifGenMermaidText, callChainList);
+        return mdtext;
+
+    }
+
+    public static String chainToMarkdown(String title, boolean ifGenMermaidText, List<MethodCallChain> callChainList) {
+        log.info("{} 总共 {} 个 调用链 ", title, callChainList.size());
 
         MdGenMdUtil.SectionBuilder mdBuilder = MdGenMdUtil.of()
                 //h2
-                .bigTitle(tableName)
+                .bigTitle(title)
                 .text("\n")
                 .ref()
                 .text(String.format("总共 %s 个 调用链 ", callChainList.size()))
@@ -199,8 +241,7 @@ public class AnalysisTool {
                         for (Integer integer = 0; integer < depth - 1; integer++) {
                             tabPrefix.append(tab);
                         }
-                        mdBuilder
-                                .text(tabPrefix + "- [ ] " + nodeRes.getCurrent().getNodeRemark());
+                        mdBuilder.text(tabPrefix + "- [ ] " + nodeRes.getCurrent().getNodeRemark());
                     });
 
                     mdBuilder.text("\n")
@@ -219,7 +260,6 @@ public class AnalysisTool {
         }
         String mdtext = mdBuilder.build();
         return mdtext;
-
     }
 
     /**
@@ -249,6 +289,37 @@ public class AnalysisTool {
             });
         }
         return endPointMappings;
+    }
+
+
+    Map<String, String> moduleContextPathMap = new HashMap<>();
+
+    {
+        moduleContextPathMap.put("bam", "/bam");
+        moduleContextPathMap.put("compliance", "/compliance");
+        moduleContextPathMap.put("im", "/im/V1.0");
+        moduleContextPathMap.put("news", "/news");
+        moduleContextPathMap.put("sso", "/sso/V1.0");
+        moduleContextPathMap.put("transaction", "/transaction");
+        moduleContextPathMap.put("transfer_account", "/transfer/account");
+        moduleContextPathMap.put("user", "/user");
+        moduleContextPathMap.put("web", "/server/V1.0");
+        moduleContextPathMap.put("websocket", "/websocket");
+        moduleContextPathMap.put("lifecycle_manage", "/lifecycle/management");
+        moduleContextPathMap.put("project_manager", "/project");
+        moduleContextPathMap.put("private_equity", "/private/equity");
+        moduleContextPathMap.put("data_report", "/dataReport");
+        moduleContextPathMap.put("organization", "/organization");
+        moduleContextPathMap.put("dashboard", "/dashboard");
+        moduleContextPathMap.put("special_service", "/special/service");
+        moduleContextPathMap.put("right", "/right");
+        moduleContextPathMap.put("file_server", "/file");
+        moduleContextPathMap.put("background", "/background");
+        moduleContextPathMap.put("newsPlate", "/newsPlate");
+        moduleContextPathMap.put("risk", "/risk");
+        moduleContextPathMap.put("ltv_cof", "/ltvcof");
+        moduleContextPathMap.put("member", "/member");
+        moduleContextPathMap.put("community", "/community");
     }
 
 
@@ -319,5 +390,43 @@ public class AnalysisTool {
             }
         }
         return resultList;
+    }
+
+    public String queryCallGraphToMdTxt(String direction, String classFullyName, String methodName, boolean genMermaidText) {
+        MethodCallChain callChain;
+        if (StrUtil.equals(direction, "down")) {
+            callChain = sootUpByteCodeAnalysis.queryCallGraph(classFullyName, methodName);
+        } else {
+            callChain = sootUpByteCodeAnalysis.queryCallReverseGraph(classFullyName, methodName);
+        }
+
+        String content = chainToMarkdown(classFullyName + "#" + methodName, genMermaidText, Collections.singletonList(callChain));
+        return content;
+    }
+
+    public Set<String> allTables() {
+        Set<String> tables = new HashSet<>();
+        tables.addAll(sootUpByteCodeAnalysis.getTableNameAndMybatisPlusServiceClassMap().keySet());
+        tables.addAll(sootUpByteCodeAnalysis.getTableNameAndMybatisPlusPojoClassMap().keySet());
+        HashMultimap<JavaSootMethod, String> annotationMethodTableNameMap = sootUpByteCodeAnalysis.getAnnotationMethodTableNameMap();
+        tables.addAll(annotationMethodTableNameMap.values());
+        tables.addAll(sqlXmlService.getAllSqlTables());
+        return tables;
+    }
+
+    public Collection<EndpointRes> allEndPoints() {
+        Map<JavaSootMethod, String> endPointMethodUriMap = sootUpByteCodeAnalysis.getEndPointMethodUriMap();
+        List<EndpointRes> reslist = new ArrayList<>();
+        HashMultimap<@Nullable String, @Nullable MethodCallNodeInfo> uriHashTable = HashMultimap.create();
+        endPointMethodUriMap.forEach((method, uri) -> {
+            uriHashTable.put(uri, new MethodCallNodeInfo(method));
+        });
+        uriHashTable.asMap().forEach((uri, methods) -> {
+            EndpointRes endpointRes = new EndpointRes();
+            endpointRes.setUri(uri);
+            endpointRes.setMethods(methods);
+            reslist.add(endpointRes);
+        });
+        return reslist;
     }
 }

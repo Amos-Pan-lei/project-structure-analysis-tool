@@ -4,13 +4,13 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.amos.analysisprojecttool.bean.bytecode.MethodCallChain;
 import com.amos.analysisprojecttool.bean.bytecode.MethodCallGraphNode;
+import com.amos.analysisprojecttool.config.AnalysisProperties;
 import com.amos.analysisprojecttool.util.AnalysisClassUtils;
 import com.amos.analysisprojecttool.util.MyAsmUtil;
 import com.amos.analysisprojecttool.util.MybatisPlusUtils;
 import com.amos.analysisprojecttool.util.SqlAnalysisUtils;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Sets;
-import com.amos.analysisprojecttool.config.AnalysisProperties;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.objectweb.asm.tree.AnnotationNode;
@@ -87,35 +87,37 @@ public class SootUpByteCodeAnalysis {
      * 所有方法父子引用关系
      * 父 -- 子[]
      */
-    private HashMultimap<JavaSootMethod, JavaSootMethod> methodCallMap = HashMultimap.create();
+    @Getter
+    private static HashMultimap<JavaSootMethod, JavaSootMethod> methodCallMap = HashMultimap.create();
 
     /**
      * 方法引用  子 - 父关系
      * 子 -- 父[]
      */
-    private HashMultimap<JavaSootMethod, JavaSootMethod> methodCallReverseMap = HashMultimap.create();
+    @Getter
+    private static HashMultimap<JavaSootMethod, JavaSootMethod> methodCallReverseMap = HashMultimap.create();
 
     /**
      * 保存解析到的类 与 类注解的关系
      */
-    private HashMultimap<JavaSootClass, AnnotationUsage> classAnnotationUsageMap = HashMultimap.create();
+    private static HashMultimap<JavaSootClass, AnnotationUsage> classAnnotationUsageMap = HashMultimap.create();
 
 
     /**
      * 加了注解@mapper的类 集合
      */
-    private Set<JavaSootClass> annotationMapperClasses = new HashSet<>();
+    private static Set<JavaSootClass> annotationMapperClasses = new HashSet<>();
 
     /**
      * method对应注解的映射Map
      */
-    private HashMultimap<JavaSootMethod, AnnotationUsage> methodAnnotationpMap = HashMultimap.create();
+    private static HashMultimap<JavaSootMethod, AnnotationUsage> methodAnnotationpMap = HashMultimap.create();
 
     /**
      * web的接口 method对应的  uri
      */
     @Getter
-    private Map<JavaSootMethod, String> endPointMethodUriMap = new HashMap<>();
+    private static Map<JavaSootMethod, String> endPointMethodUriMap = new HashMap<>();
 
     /**
      * 查询method对应的 web url
@@ -137,7 +139,7 @@ public class SootUpByteCodeAnalysis {
     );
 
     /**
-     * 注解实现的sql 方法雨表名 映射map
+     * 注解实现的sql 方法与表名 映射map
      */
     @Getter
     private HashMultimap<JavaSootMethod, String> annotationMethodTableNameMap = HashMultimap.create();
@@ -177,6 +179,7 @@ public class SootUpByteCodeAnalysis {
     /**
      * 表名 与 对应 @TableName 注解的实体类 映射map
      */
+    @Getter
     private HashMultimap<String, JavaSootClass> tableNameAndMybatisPlusPojoClassMap = HashMultimap.create();
 
     /**
@@ -193,6 +196,7 @@ public class SootUpByteCodeAnalysis {
     /**
      * 表名 与 对应ServiceImpl   映射 map
      */
+    @Getter
     private HashMultimap<String, JavaSootClass> tableNameAndMybatisPlusServiceClassMap = HashMultimap.create();
 
     /**
@@ -282,7 +286,8 @@ public class SootUpByteCodeAnalysis {
         workedNodeSet.add(current);
         Set<JavaSootMethod> childMethods;
         callGraphNode.setEndPointUrl(queryMethodUri(current));
-
+        Set<AnnotationUsage> methodAnnotations = findMethodAnnotations(current);
+        callGraphNode.setMethodAnnotations(methodAnnotations);
         if (current.isAbstract()) {
             //抽象方法 跳转到 对于的 实现方法去
             childMethods = new HashSet<>(findImplMethod(current));
@@ -290,6 +295,8 @@ public class SootUpByteCodeAnalysis {
             childMethods = methodCallMap.get(current);
         }
         if (CollUtil.isEmpty(childMethods)) {
+            //叶子节点
+            callGraphNode.setLeafNode(true);
             return;
         }
         List<MethodCallGraphNode> childs = childMethods.stream()
@@ -355,11 +362,15 @@ public class SootUpByteCodeAnalysis {
         }
         workedNodeSet.add(current);
         callGraphNode.setEndPointUrl(queryMethodUri(current));
+        Set<AnnotationUsage> methodAnnotations = findMethodAnnotations(current);
+        callGraphNode.setMethodAnnotations(methodAnnotations);
 
         List<JavaSootMethod> abstractMethods = findAbstractMethod(current);
         HashSet<JavaSootMethod> childMethods = new HashSet<>(methodCallReverseMap.get(current));
         childMethods.addAll(abstractMethods);
         if (CollUtil.isEmpty(childMethods)) {
+            //叶子节点
+            callGraphNode.setLeafNode(true);
             return;
         }
         List<MethodCallGraphNode> childs = childMethods.stream()
@@ -597,7 +608,7 @@ public class SootUpByteCodeAnalysis {
         return aClass;
     }
 
-    public Set<AnnotationUsage> findMethodAnnotations(JavaSootMethod method) {
+    public static Set<AnnotationUsage> findMethodAnnotations(JavaSootMethod method) {
         Set<AnnotationUsage> annotationUsages = methodAnnotationpMap.get(method);
         return annotationUsages;
     }
@@ -686,6 +697,24 @@ public class SootUpByteCodeAnalysis {
                     });
                     log.info("类 {} 为 plus的mapper", sootClass.getName());
                 }
+                if (superInterfaces.stream().anyMatch(x -> x.getName().equals(MybatisPlusUtils.IService_CLASSNAME))) {
+                    Class<? extends JavaSootClassSource> curclassReflactClass = sootClass.getClassSource().getClass();
+                    Field classNodeField = curclassReflactClass.getDeclaredField("classNode");
+                    classNodeField.setAccessible(true);
+                    ClassNode o = (ClassNode) classNodeField.get(sootClass.getClassSource());
+                    Type pojoClassType = AsmUtil.toJimpleSignature(StrUtil.removePrefix(StrUtil.subBetween(o.signature, "<", ">").split(";")[0], "L"));
+                    Optional<JavaSootClass> pojoClassOpt = findClass(pojoClassType.toString());
+                    pojoClassOpt.ifPresent(pojo -> {
+                        try {
+                            String tableNameFromPojo = findTableNameFromPojo(pojo);
+                            tableNameAndMybatisPlusServiceClassMap.put(tableNameFromPojo, sootClass);
+                        } catch (Exception e) {
+
+                        }
+                    });
+                    log.info("类 {} 为 plus的 IService", sootClass.getName());
+                }
+
             }
             if (sootClass.isConcrete()) {
                 //判断是否为 plus的 service
@@ -708,6 +737,7 @@ public class SootUpByteCodeAnalysis {
                     });
 
                 }
+
             }
 
         } catch (Exception e) {

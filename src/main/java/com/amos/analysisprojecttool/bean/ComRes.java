@@ -11,8 +11,8 @@ public class ComRes<T> {
     private String msg = "OK";
     private T data;
 
-    public static <T> ComRes success(T body) {
-        ComRes res = new ComRes();
+    public static <T> ComRes<T> success(T body) {
+        ComRes res = new ComRes<>();
         res.setData(body);
         return res;
     }

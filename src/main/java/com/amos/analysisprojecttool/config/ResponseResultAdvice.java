@@ -20,7 +20,7 @@ import java.util.Objects;
 
 @Slf4j
 @ConditionalOnClass(ResponseBodyAdvice.class)
-@ControllerAdvice(basePackages = "com.amos.saaswork")
+@ControllerAdvice(basePackages = "com.amos.analysisprojecttool")
 public class ResponseResultAdvice implements ResponseBodyAdvice<Object> {
 
 

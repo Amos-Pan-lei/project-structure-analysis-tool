@@ -1,12 +1,18 @@
 package com.amos.analysisprojecttool.bean.res;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.amos.analysisprojecttool.bean.bytecode.MethodCallChain;
 import com.amos.analysisprojecttool.bean.bytecode.MethodCallGraphNode;
+import com.google.common.collect.Sets;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import sootup.java.core.AnnotationUsage;
 
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 方法调用函数图响应
@@ -59,6 +65,26 @@ public class MethodCallChainRes {
         }
         MethodCallNodeInfo nodeInfo = new MethodCallNodeInfo(original.getCurrent());
         nodeInfo.setEndPointUrl(original.getEndPointUrl());
+        nodeInfo.setLeafNode(original.isLeafNode());
+        Set<AnnotationUsage> methodAnnotations = original.getMethodAnnotations();
+        if (original.isLeafNode() && CollUtil.isNotEmpty(methodAnnotations)) {
+            Set<String> annotations = methodAnnotations.stream().map(x -> {
+                try {
+                    String anno = x.toString();
+                    for (String excludeAnnotation : includeAnnotations) {
+                        if (StrUtil.startWith(anno, excludeAnnotation)) {
+                            return anno;
+                        }
+                    }
+                } catch (Exception e) {
+                }
+                return null;
+            }).filter(Objects::nonNull).collect(Collectors.toSet());
+            nodeInfo.setAnnotations(annotations);
+        }
         return nodeInfo;
     }
+
+    public static Set<String> includeAnnotations = Sets.newHashSet("@org.springframework.kafka.annotation",
+            "@com.xxl.job.core.handler.annotation" );
 }

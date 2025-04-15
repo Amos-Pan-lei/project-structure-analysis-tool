@@ -2,7 +2,6 @@ package com.amos.analysisprojecttool.config;
 
 import com.amos.analysisprojecttool.service.SootUpByteCodeAnalysis;
 import com.amos.analysisprojecttool.service.sql.SqlXmlService;
-import com.amos.analysisprojecttool.util.AnalysisClassUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -38,8 +37,6 @@ public class AnalysisAutoConfiguration implements ApplicationListener<Applicatio
     public SootUpByteCodeAnalysis sootUpByteCodeAnalysis() {
         SootUpByteCodeAnalysis sootUpByteCodeAnalysis = new SootUpByteCodeAnalysis(analysisProperties.getTargetDirs(), analysisProperties.getJarLibs());
         this.sootUpByteCodeAnalysis = sootUpByteCodeAnalysis;
-
-
         return sootUpByteCodeAnalysis;
     }
 
@@ -47,7 +44,6 @@ public class AnalysisAutoConfiguration implements ApplicationListener<Applicatio
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
         AnalysisAutoConfiguration.INITD = false;
-        AnalysisClassUtils.BASE_PACKAGE_NAME = analysisProperties.getTypePackageNamePrefix();
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         CompletableFuture<Void> voidCompletableFuture = CompletableFuture.runAsync(() -> {
             sootUpByteCodeAnalysis.startUp();

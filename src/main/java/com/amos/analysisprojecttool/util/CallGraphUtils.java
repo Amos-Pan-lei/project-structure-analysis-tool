@@ -1,5 +1,6 @@
 package com.amos.analysisprojecttool.util;
 
+import cn.hutool.core.util.StrUtil;
 import com.amos.analysisprojecttool.bean.res.MethodCallChainRes;
 import com.amos.analysisprojecttool.bean.res.MethodCallGraphNodeRes;
 import com.amos.analysisprojecttool.bean.res.MethodCallNodeInfo;
@@ -26,7 +27,10 @@ public class CallGraphUtils {
             String nodeName = UUID.randomUUID().toString().replace("-", "");
             nodeNameMap.put(nodeInfo, nodeName);
             String nodeRemark = nodeInfo.getNodeRemark();
-            stringBuilder.append(String.format("%s[\"`%s`\"]\n", nodeName, nodeRemark));
+            nodeRemark = StrUtil.replace(nodeRemark,"\"","'");
+            nodeRemark = StrUtil.replace(nodeRemark,"[","'");
+            nodeRemark = StrUtil.replace(nodeRemark,"]","'");
+            stringBuilder.append(String.format("%s[ %s ]\n", nodeName, nodeRemark));
         }
         callRelation.forEach((parent, child) -> {
             stringBuilder.append(String.format("%s --> %s \n", nodeNameMap.get(parent), nodeNameMap.get(child)));

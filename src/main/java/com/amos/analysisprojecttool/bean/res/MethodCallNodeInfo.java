@@ -1,10 +1,13 @@
 package com.amos.analysisprojecttool.bean.res;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import sootup.core.model.SootMethod;
+
+import java.util.Set;
 
 /**
  * 调用图 节点详细信息
@@ -37,6 +40,18 @@ public class MethodCallNodeInfo {
      */
     @ApiModelProperty("web接口 url")
     private String endPointUrl;
+    /**
+     * 是否为叶子节点
+     */
+    @ApiModelProperty("是否为叶子节点")
+    private boolean leafNode = false;
+
+    /**
+     * 方法上的注解
+     */
+    @ApiModelProperty("方法上的注解")
+    private Set<String> annotations;
+
 
     public MethodCallNodeInfo() {
     }
@@ -52,7 +67,9 @@ public class MethodCallNodeInfo {
         if (StrUtil.isNotEmpty(getEndPointUrl())) {
             nodeRemark = nodeRemark + "\nURL : [ " + getEndPointUrl() + " ]";
         }
-
+        if (CollUtil.isNotEmpty(annotations)) {
+            nodeRemark = nodeRemark +"\nannotations : "+ annotations;
+        }
         return nodeRemark;
     }
 }

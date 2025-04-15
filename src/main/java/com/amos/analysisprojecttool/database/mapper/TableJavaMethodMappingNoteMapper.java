@@ -1,7 +1,7 @@
 package com.amos.analysisprojecttool.database.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.amos.analysisprojecttool.database.pojo.TableJavaMethodMappingNote;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

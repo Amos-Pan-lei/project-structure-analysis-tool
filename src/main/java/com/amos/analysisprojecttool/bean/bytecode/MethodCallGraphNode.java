@@ -1,10 +1,12 @@
 package com.amos.analysisprojecttool.bean.bytecode;
 
 import lombok.Data;
+import sootup.java.core.AnnotationUsage;
 import sootup.java.core.JavaSootMethod;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 @Data
@@ -16,9 +18,10 @@ public class MethodCallGraphNode {
         this.current = current;
     }
 
-
     private JavaSootMethod current;
     private String endPointUrl;
+    private Set<AnnotationUsage> methodAnnotations;
+    private boolean leafNode = false;
     private Collection<MethodCallGraphNode> childs = new HashSet<>();
 
     /**

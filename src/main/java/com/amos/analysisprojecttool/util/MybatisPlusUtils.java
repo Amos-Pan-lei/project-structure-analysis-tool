@@ -16,7 +16,7 @@ public class MybatisPlusUtils {
 
     public static String BaseMapper_CLASSNAME = "com.baomidou.mybatisplus.core.mapper.BaseMapper";
 
-    public static String ServiceImpl_CLASSNAME = "com.baomidou.mybatisplus.extension.service.impl.ServiceImpl";
+    public static String ServiceImpl_CLASSNAME = "com.baomidou.mybatisplus.extension.service.imamos.ServiceImpl";
     public static String IService_CLASSNAME = "com.baomidou.mybatisplus.extension.service.IService";
 
     private static JavaSootClass mybatisPlusBaseMapperClass = null;

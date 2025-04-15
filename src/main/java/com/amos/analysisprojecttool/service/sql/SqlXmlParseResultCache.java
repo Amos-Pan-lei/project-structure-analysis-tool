@@ -3,6 +3,7 @@ package com.amos.analysisprojecttool.service.sql;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -101,9 +102,16 @@ public class SqlXmlParseResultCache {
 
     public String getStoreFilePath(String xmlAbsolutePath) {
         String forHashDir = StrUtil.removeSuffix(xmlAbsolutePath, FileUtil.getName(xmlAbsolutePath));
+        String fileMd5 = calcFileMd5(xmlAbsolutePath);
 
-        return CACHE_FILE_DIR + FileUtil.FILE_SEPARATOR + HashUtil.apHash(forHashDir) + FileUtil.FILE_SEPARATOR + FileUtil.mainName(xmlAbsolutePath) + ".json";
+        return CACHE_FILE_DIR + FileUtil.FILE_SEPARATOR + HashUtil.apHash(forHashDir) + FileUtil.FILE_SEPARATOR + FileUtil.mainName(xmlAbsolutePath)+"-"+fileMd5 + ".json";
     }
 
+    public String calcFileMd5(String xmlAbsolutePath){
+        File file = FileUtil.file(xmlAbsolutePath);
+        // 计算文件的MD5值
+        String md5 = DigestUtil.md5Hex(file);
+        return md5;
+    }
 
 }

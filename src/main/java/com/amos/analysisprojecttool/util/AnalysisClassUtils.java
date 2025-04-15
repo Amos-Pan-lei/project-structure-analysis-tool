@@ -6,9 +6,6 @@ import sootup.core.types.ClassType;
 import sootup.java.core.JavaSootMethod;
 
 public class AnalysisClassUtils {
-
-    public static String BASE_PACKAGE_NAME = "";
-
     private AnalysisClassUtils() {
     }
 
@@ -18,8 +15,9 @@ public class AnalysisClassUtils {
     }
 
     public static String extractModuleName(String packageName) {
-        if (packageName.startsWith(BASE_PACKAGE_NAME)) {
-            String moduleName = StrUtil.subBetween(packageName, BASE_PACKAGE_NAME + ".", ".");
+        if (packageName.startsWith("hk.com.easyview")) {
+            String s = StrUtil.removePrefix(packageName, "hk.com.easyview.");
+            String moduleName = StrUtil.subBefore(s, ".", false);
             return moduleName;
         }
         return StrUtil.EMPTY;
