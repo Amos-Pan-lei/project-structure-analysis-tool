@@ -1,6 +1,8 @@
 package com.amos.analysisprojecttool.config;
 
+import cn.hutool.core.lang.UUID;
 import cn.hutool.http.HttpStatus;
+import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -34,8 +36,10 @@ public class DefaultCorsFilter implements Filter {
             response.getWriter().write("OPTIONS returns OK");
             return;
         }
-
+        String traceId = UUID.fastUUID().toString();
+        MDC.put("traceId", traceId);
+        response.setHeader("traceId",traceId);
         chain.doFilter(request, response);
-
+        MDC.remove("traceId");
     }
 }
