@@ -47,7 +47,7 @@ analysis:
   targetDirs:
     #    - 'D:\fargo-crm-backend\fargo-news\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-background\target\classes'
-    - 'D:\fargo-crm-backend\fargo-common\target\classes'
+#    - 'D:\fargo-crm-backend\fargo-common\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-community\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-compliance\target\classes'
 #    - 'D:\fargo-crm-backend\fargo-dashboard\target\classes'
@@ -56,11 +56,11 @@ analysis:
     #    - 'D:\fargo-crm-backend\fargo-file-server\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-im\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-lifecycle-calc\target\classes'
-    #    - 'D:\fargo-crm-backend\fargo-lifecycle-management\target\classes'
+    - 'D:\fargo-crm-backend\fargo-lifecycle-management\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-ltv-cof\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-mail\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-member\target\classes'
-    - 'D:\fargo-crm-backend\fargo-bam\target\classes'
+#    - 'D:\fargo-crm-backend\fargo-bam\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-news\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-news-plate\target\classes'
     #    - 'D:\fargo-crm-backend\fargo-notification\target\classes'
@@ -87,7 +87,8 @@ analysis:
   sqlXmlBaseDirs:
 #    - 'D:\fargo-crm-backend\fargo-risk\src\main\resources'
 #    - 'D:\fargo-crm-backend\fargo-transaction\src\main\resources'
-    - 'D:\fargo-crm-backend\fargo-bam\src\main\resources\mapper'
+#    - 'D:\fargo-crm-backend\fargo-bam\src\main\resources\mapper'
+    - 'D:\fargo-crm-backend\fargo-lifecycle-management\src\main\resources\mapper'
 #    - 'D:\fargo-crm-backend\fargo-dashboard\src\main\resources'
   sqlXml:
     cache:

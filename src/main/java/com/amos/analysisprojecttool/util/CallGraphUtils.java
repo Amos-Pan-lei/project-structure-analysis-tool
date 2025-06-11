@@ -30,6 +30,8 @@ public class CallGraphUtils {
             nodeRemark = StrUtil.replace(nodeRemark,"\"","'");
             nodeRemark = StrUtil.replace(nodeRemark,"[","'");
             nodeRemark = StrUtil.replace(nodeRemark,"]","'");
+            nodeRemark = StrUtil.replace(nodeRemark,"{","'");
+            nodeRemark = StrUtil.replace(nodeRemark,"}","'");
             stringBuilder.append(String.format("%s[ %s ]\n", nodeName, nodeRemark));
         }
         callRelation.forEach((parent, child) -> {
